@@ -20,10 +20,15 @@ const char* password = "TU_PASSWORD";
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
 
-Adafruit_SSD1306 l(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_SSD1306 l(
+  SCREEN_WIDTH,
+  SCREEN_HEIGHT,
+  &Wire,
+  OLED_RESET
+);
 
 // =======================
-// WEB SERVER
+// SERVER
 // =======================
 
 ESP8266WebServer server(80);
@@ -32,65 +37,98 @@ ESP8266WebServer server(80);
 // VARIABLES
 // =======================
 
-unsigned long t;
-unsigned long afk;
-unsigned long te;
+int emotion = 0;
 
-int e = 0;
-int to = 0;
-int cd;
+// 0 normal
+// 1 feliz
+// 2 cute
+// 3 triste
+// 4 angry
+// 5 dormido
+// 6 hablando
+// 7 pensando
+
+bool talking = false;
+bool thinking = false;
+
+unsigned long lastAction = 0;
+unsigned long blinkTimer = 0;
+bool blinkNow = false;
 
 // =======================
-// CARAS
+// OJOS
 // =======================
 
-void oa(){ // ojos abiertos
-  l.fillCircle(59, 25, 2, WHITE);
-  l.fillCircle(59, 23, 2, WHITE);
-  l.fillCircle(59, 21, 2, WHITE);
+void openEyes(){
 
-  l.fillCircle(69, 25, 2, WHITE);
-  l.fillCircle(69, 23, 2, WHITE);
-  l.fillCircle(69, 21, 2, WHITE);
+  l.fillCircle(58,22,3,WHITE);
+  l.fillCircle(70,22,3,WHITE);
+
 }
 
-void oc(){ // ojos cerrados
-  l.drawLine(61, 23, 55, 23, WHITE);
-  l.drawLine(73, 23, 67, 23, WHITE);
-}
+void closedEyes(){
 
-void bf(){ // boca normal
-  l.drawLine(54, 40, 64, 50, WHITE);
-  l.drawLine(74, 40, 64, 50, WHITE);
+  l.drawLine(54,22,62,22,WHITE);
+  l.drawLine(66,22,74,22,WHITE);
 
-  l.drawLine(54, 39, 64, 49, WHITE);
-  l.drawLine(74, 39, 64, 49, WHITE);
-}
-
-void bmf(){ // feliz
-  l.fillCircle(64, 40, 10, WHITE);
-  l.fillRect(54, 30, 40, 10, BLACK);
-}
-
-void bw(){ // cute
-  l.drawLine(54, 40, 59, 50, WHITE);
-  l.drawLine(74, 40, 69, 50, WHITE);
-
-  l.drawLine(69, 50, 64, 45, WHITE);
-  l.drawLine(59, 50, 64, 45, WHITE);
-
-  l.drawLine(54, 39, 59, 49, WHITE);
-  l.drawLine(74, 39, 69, 49, WHITE);
-}
-
-void sad(){ // triste
-  l.drawLine(56, 48, 64, 42, WHITE);
-  l.drawLine(64, 42, 72, 48, WHITE);
 }
 
 void angryEyes(){
-  l.drawLine(55, 20, 61, 24, WHITE);
-  l.drawLine(67, 24, 73, 20, WHITE);
+
+  l.drawLine(54,18,62,24,WHITE);
+  l.drawLine(66,24,74,18,WHITE);
+
+}
+
+void sleepEyes(){
+
+  l.drawLine(54,24,62,24,WHITE);
+  l.drawLine(66,24,74,24,WHITE);
+
+  l.drawLine(60,16,64,10,WHITE);
+  l.drawLine(66,16,70,10,WHITE);
+
+}
+
+// =======================
+// BOCAS
+// =======================
+
+void mouthNormal(){
+
+  l.drawLine(56,44,64,48,WHITE);
+  l.drawLine(64,48,72,44,WHITE);
+
+}
+
+void mouthHappy(){
+
+  l.drawCircle(64,42,10,WHITE);
+
+  l.fillRect(52,28,24,12,BLACK);
+
+}
+
+void mouthSad(){
+
+  l.drawLine(56,50,64,44,WHITE);
+  l.drawLine(64,44,72,50,WHITE);
+
+}
+
+void mouthCute(){
+
+  l.drawLine(58,42,64,48,WHITE);
+  l.drawLine(64,48,70,42,WHITE);
+
+  l.drawLine(64,48,64,52,WHITE);
+
+}
+
+void mouthTalk(){
+
+  l.fillRoundRect(56,38,16,14,4,WHITE);
+
 }
 
 // =======================
@@ -101,186 +139,190 @@ void drawFace(){
 
   l.clearDisplay();
 
-  switch(e){
+  bool sleepMode =
+  (millis() - lastAction > 10000);
 
-    case 0:
-      oa();
-      bf();
-    break;
+  if(sleepMode){
 
-    case 1:
-      oa();
-      bmf();
-    break;
+    emotion = 5;
 
-    case 2:
-      oc();
-      bw();
-    break;
+  }
 
-    case 3:
-      oa();
-      sad();
-    break;
+  // OJOS
 
-    case 4:
-      angryEyes();
-      sad();
-    break;
+  if(emotion == 4){
+
+    angryEyes();
+
+  }
+  else if(emotion == 5){
+
+    sleepEyes();
+
+  }
+  else{
+
+    if(blinkNow){
+
+      closedEyes();
+
+    }else{
+
+      openEyes();
+
+    }
+
+  }
+
+  // BOCA
+
+  if(talking){
+
+    mouthTalk();
+
+  }
+  else{
+
+    switch(emotion){
+
+      case 0:
+        mouthNormal();
+      break;
+
+      case 1:
+        mouthHappy();
+      break;
+
+      case 2:
+        mouthCute();
+      break;
+
+      case 3:
+        mouthSad();
+      break;
+
+      case 4:
+        mouthSad();
+      break;
+
+      case 5:
+        mouthNormal();
+      break;
+
+      case 7:
+        mouthCute();
+      break;
+
+      default:
+        mouthNormal();
+      break;
+
+    }
+
+  }
+
+  // PENSANDO
+
+  if(thinking){
+
+    l.fillCircle(94,20,2,WHITE);
+    l.fillCircle(100,16,3,WHITE);
+    l.fillCircle(108,12,4,WHITE);
 
   }
 
   l.display();
+
 }
 
 // =======================
-// WEB
+// ROUTES
 // =======================
-
-String html = R"=====(
-
-<!DOCTYPE html>
-<html>
-<head>
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-
-body{
-background:#111;
-color:white;
-font-family:Arial;
-padding:20px;
-}
-
-button{
-width:100%;
-padding:15px;
-margin-top:10px;
-font-size:18px;
-border:none;
-border-radius:10px;
-background:#333;
-color:white;
-}
-
-input{
-width:100%;
-padding:15px;
-font-size:18px;
-border-radius:10px;
-border:none;
-margin-top:10px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h1>Timbito</h1>
-
-<p>IP actual:</p>
-
-<input id="ip" value="192.168.1.100">
-
-<button onclick="sendEmotion('happy')">
-Feliz
-</button>
-
-<button onclick="sendEmotion('cute')">
-Cute
-</button>
-
-<button onclick="sendEmotion('sad')">
-Triste
-</button>
-
-<button onclick="sendEmotion('angry')">
-Enojado
-</button>
-
-<button onclick="sendEmotion('normal')">
-Normal
-</button>
-
-<script>
-
-async function sendEmotion(emotion){
-
-let ip = document.getElementById("ip").value;
-
-try{
-
-await fetch(
-'http://' + ip + '/emotion?e=' + emotion
-);
-
-}
-catch(err){
-console.log(err);
-}
-
-}
-
-</script>
-
-</body>
-</html>
-
-)=====";
-
-// =======================
-// RUTAS
-// =======================
-
-void handleRoot(){
-
-  server.send(200, "text/html", html);
-
-}
 
 void handleEmotion(){
 
-  String emotion = server.arg("e");
+  String e = server.arg("e");
 
-  if(emotion == "happy"){
-    e = 1;
+  lastAction = millis();
+
+  if(e == "happy"){
+    emotion = 1;
   }
-  else if(emotion == "cute"){
-    e = 2;
+  else if(e == "cute"){
+    emotion = 2;
   }
-  else if(emotion == "sad"){
-    e = 3;
+  else if(e == "sad"){
+    emotion = 3;
   }
-  else if(emotion == "angry"){
-    e = 4;
+  else if(e == "angry"){
+    emotion = 4;
   }
   else{
-    e = 0;
+    emotion = 0;
   }
-
-  te = millis();
 
   drawFace();
 
-  server.send(200, "text/plain", "ok");
+  server.send(200,"text/plain","ok");
+
+}
+
+void handleTalk(){
+
+  talking = true;
+
+  lastAction = millis();
+
+  drawFace();
+
+  server.send(200,"text/plain","talking");
+
+}
+
+void handleStopTalk(){
+
+  talking = false;
+
+  drawFace();
+
+  server.send(200,"text/plain","stop");
+
+}
+
+void handleThinking(){
+
+  thinking = true;
+
+  lastAction = millis();
+
+  drawFace();
+
+  server.send(200,"text/plain","thinking");
+
+}
+
+void handleStopThinking(){
+
+  thinking = false;
+
+  drawFace();
+
+  server.send(200,"text/plain","stop");
+
 }
 
 // =======================
-// WIFI CONNECT
+// WIFI
 // =======================
 
 void connectWiFi(){
 
   WiFi.mode(WIFI_STA);
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(ssid,password);
 
   Serial.println("");
-  Serial.println("Conectando a WiFi");
+  Serial.println("Conectando WiFi");
 
   while(WiFi.status() != WL_CONNECTED){
 
@@ -292,7 +334,6 @@ void connectWiFi(){
 
   Serial.println("");
   Serial.println("WiFi conectado");
-  Serial.println("");
 
   Serial.print("IP: ");
   Serial.println(WiFi.localIP());
@@ -307,26 +348,29 @@ void setup(){
 
   Serial.begin(115200);
 
-  // OLED
-  l.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  l.begin(
+    SSD1306_SWITCHCAPVCC,
+    0x3C
+  );
 
   l.clearDisplay();
-  l.setTextColor(WHITE);
-  l.setTextSize(1);
+  l.display();
 
-  drawFace();
-
-  // WIFI
   connectWiFi();
 
-  // SERVER
-  server.on("/", handleRoot);
+  server.on("/emotion",handleEmotion);
 
-  server.on("/emotion", handleEmotion);
+  server.on("/talk",handleTalk);
+
+  server.on("/stoptalk",handleStopTalk);
+
+  server.on("/thinking",handleThinking);
+
+  server.on("/stopthinking",handleStopThinking);
 
   server.begin();
 
-  Serial.println("Servidor iniciado");
+  lastAction = millis();
 
 }
 
@@ -338,49 +382,19 @@ void loop(){
 
   server.handleClient();
 
-  // volver a normal luego de tiempo
-  if(millis() - te > 10000){
+  // PARPADEO
 
-    e = 0;
+  if(millis() - blinkTimer > 4000){
 
-  }
+    blinkNow = true;
 
-  // parpadeo
-  if(millis() - t > 4000){
-
-    l.clearDisplay();
-
-    oc();
-
-    switch(e){
-
-      case 0:
-        bf();
-      break;
-
-      case 1:
-        bmf();
-      break;
-
-      case 2:
-        bw();
-      break;
-
-      case 3:
-        sad();
-      break;
-
-      case 4:
-        sad();
-      break;
-
-    }
-
-    l.display();
+    drawFace();
 
     delay(120);
 
-    t = millis();
+    blinkNow = false;
+
+    blinkTimer = millis();
 
   }
 

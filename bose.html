@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Timbito PRO</title>
+<title>Te Invito IA</title>
 
 <style>
 body{
@@ -17,10 +17,10 @@ body{
 .container{max-width:720px;margin:auto;}
 
 .card{
-    background:#1c1c1c;
-    padding:15px;
+    background:#1b1b1b;
     border-radius:14px;
-    margin-bottom:12px;
+    padding:15px;
+    margin-bottom:15px;
 }
 
 input,button{
@@ -35,34 +35,20 @@ input,button{
 input{background:#2a2a2a;color:white;}
 button{background:#333;color:white;}
 
-button:active{transform:scale(.98);}
-
 .chat{
     background:#222;
-    padding:12px;
+    padding:15px;
     border-radius:10px;
     margin-top:12px;
-    min-height:120px;
+    min-height:140px;
     white-space:pre-wrap;
 }
 
-.micBox{
-    display:flex;
-    align-items:center;
-    gap:10px;
+.mic{
     margin-top:10px;
-}
-
-.dot{
-    width:14px;
-    height:14px;
-    border-radius:50%;
-    background:#666;
-}
-
-.active{
-    background:#00ff88;
-    box-shadow:0 0 10px #00ff88;
+    padding:10px;
+    background:#222;
+    border-radius:10px;
 }
 </style>
 </head>
@@ -73,24 +59,18 @@ button:active{transform:scale(.98);}
 
 <div class="card">
 
-<h2>Timbito PRO 🤖</h2>
+<h2>Te Invito 🤖</h2>
 
-<input id="key" placeholder="API KEY OpenRouter">
-
-<button onclick="saveKey()">Guardar KEY</button>
-
-<input id="msg" placeholder="Escribe o usa micrófono">
-
+<input id="message" placeholder="Mensaje">
 <button onclick="talk()">Enviar</button>
 
-<button onclick="toggleTimbito()">🎤 Timbito ON/OFF</button>
+<button onclick="toggleMic()">🎤 Micrófono</button>
 
-<div class="micBox">
-<div id="dot" class="dot"></div>
-<div id="micText">Timbito apagado</div>
+<div id="chat" class="chat">Listo</div>
+
+<div class="mic" id="micStatus">
+Micrófono: OFF
 </div>
-
-<div id="chat" class="chat">Listo...</div>
 
 </div>
 
@@ -98,187 +78,122 @@ button:active{transform:scale(.98);}
 
 <script>
 
-let recognition;
-let active=false;
-let loading=false;
+let API_KEY = "";
+let micStream = null;
+let recognition = null;
+let micReady = false;
 
-const KEY="timbito_key";
+// =========================
+// INIT MIC (1 sola vez)
+// =========================
 
-// =====================
-// INIT SPEECH
-// =====================
+async function initMic(){
 
-function initMic(){
+    if(micReady) return true;
 
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    try{
 
-    if(!SR){
-        document.getElementById("micText").innerText="No soportado";
-        return;
-    }
+        micStream = await navigator.mediaDevices.getUserMedia({audio:true});
 
-    recognition = new SR();
-    recognition.lang="es-ES";
-    recognition.continuous=false;
-    recognition.interimResults=false;
+        const SpeechRecognition =
+            window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    recognition.onstart=()=>{
-        setMic(true);
-    };
-
-    recognition.onend=()=>{
-        setMic(false);
-        if(active){
-            setTimeout(()=>recognition.start(),500);
+        if(!SpeechRecognition){
+            alert("No soporta voz");
+            return false;
         }
-    };
 
-    recognition.onerror=(e)=>{
-        setMic(false);
-        console.log(e);
-    };
+        recognition = new SpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.continuous = true;
+        recognition.interimResults = false;
 
-    recognition.onresult=(e)=>{
-        const text=e.results[0][0].transcript.trim();
-        document.getElementById("msg").value=text;
-        talk(text);
-    };
-}
+        recognition.onresult = (e)=>{
 
-// =====================
-// MIC TOGGLE (PRO)
-// =====================
+            const text = e.results[e.results.length-1][0].transcript.toLowerCase();
 
-async function toggleTimbito(){
+            document.getElementById("chat").innerHTML = "🎤 " + text;
 
-    if(!recognition) initMic();
+            handleVoice(text);
 
-    active=!active;
+        };
 
-    if(!active){
-        recognition.stop();
-        setMic(false);
-        return;
-    }
+        recognition.onerror = (e)=>{
+            console.log("mic error",e);
+        };
 
-    try{
+        micReady = true;
 
-        const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-        stream.getTracks().forEach(t=>t.stop());
-
-        recognition.start();
-
-    }catch(err){
-
-        active=false;
-
-        document.getElementById("chat").innerText=
-        "❌ Sin permiso de micrófono";
-
-    }
-}
-
-// =====================
-// UI MIC
-// =====================
-
-function setMic(state){
-
-    const dot=document.getElementById("dot");
-    const text=document.getElementById("micText");
-
-    if(state){
-        dot.classList.add("active");
-        text.innerText="🎤 Timbito escuchando...";
-    }else{
-        dot.classList.remove("active");
-        text.innerText="Timbito apagado";
-    }
-}
-
-// =====================
-// KEY
-// =====================
-
-function saveKey(){
-    localStorage.setItem(KEY,document.getElementById("key").value);
-}
-
-function getKey(){
-    return localStorage.getItem(KEY);
-}
-
-// =====================
-// IA
-// =====================
-
-async function talk(customMsg){
-
-    if(loading) return;
-    loading=true;
-
-    const key=getKey();
-    const msg=customMsg || document.getElementById("msg").value;
-
-    document.getElementById("msg").value="";
-    document.getElementById("chat").innerText="Pensando...";
-
-    try{
-
-        const res=await fetch("https://openrouter.ai/api/v1/chat/completions",{
-            method:"POST",
-            headers:{
-                "Authorization":"Bearer "+key,
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                model:"openrouter/auto",
-                messages:[
-                    {
-                        role:"system",
-                        content:`
-Eres Timbito. Responde natural, corto, en español.
-Incluye pensamiento interno al final como: 💭 ...
-No repitas mensajes.
-`
-                    },
-                    {
-                        role:"user",
-                        content:msg
-                    }
-                ]
-            })
-        });
-
-        const data=await res.json();
-        const reply=data?.choices?.[0]?.message?.content || "Error";
-
-        document.getElementById("chat").innerText=
-        "Tú: "+msg+"\n\nTimbito:\n"+reply;
-
-        speak(reply);
+        return true;
 
     }catch(e){
-        document.getElementById("chat").innerText="Error IA";
-    }
 
-    loading=false;
+        alert("Permiso de micrófono denegado");
+        return false;
+    }
 }
 
-// =====================
-// VOZ
-// =====================
+// =========================
+// MIC TOGGLE
+// =========================
 
-function speak(text){
+async function toggleMic(){
 
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang="es-ES";
-    u.rate=1;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
+    const ok = await initMic();
+
+    if(!ok) return;
+
+    if(recognition.state === "recording"){
+        recognition.stop();
+        document.getElementById("micStatus").innerHTML = "Micrófono: OFF";
+    }else{
+        recognition.start();
+        document.getElementById("micStatus").innerHTML = "Micrófono: ON";
+    }
+}
+
+// =========================
+// WAKE WORD FIX
+// =========================
+
+function handleVoice(text){
+
+    // 🔥 wake word cambiado
+    if(text.includes("te invito")){
+
+        const clean = text.replace("te invito","").trim();
+
+        if(clean){
+
+            document.getElementById("message").value = clean;
+            talk(clean);
+
+        }
+    }
+}
+
+// =========================
+// IA (simple placeholder)
+// =========================
+
+async function talk(custom=null){
+
+    const msg = custom || document.getElementById("message").value;
+
+    document.getElementById("message").value="";
+
+    document.getElementById("chat").innerHTML = "Pensando...";
+
+    // 🔥 aquí puedes conectar OpenRouter 
+    const reply = "Recibido: " + msg;
+
+    document.getElementById("chat").innerHTML =
+    "<b>Tú:</b> " + msg + "<br><br><b>Te Invito:</b> " + reply;
+
 }
 
 </script>
 
 </body>
 </html>
+

@@ -1,0 +1,108 @@
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <Wire.h>
+unsigned long t;
+int e = 0;
+int to = 0;
+unsigned long afk;
+unsigned long te;
+char* ed = "bf";
+int cd;
+Adafruit_SSD1306 l(128, 64, &Wire);
+void oa(){ // abre tusojos 0.0
+  l.fillCircle(59, 20+5, 2, WHITE);
+  l.fillCircle(59, 18+5, 2, WHITE);
+  l.fillCircle(59, 16+5, 2, WHITE); // mitad
+  l.fillCircle(69, 20+5, 2, WHITE);
+  l.fillCircle(69, 18+5, 2, WHITE);
+  l.fillCircle(69, 16+5, 2, WHITE);
+}
+void bf(){ // boca defaut :>
+  l.drawLine(54, 40, 64, 50, WHITE);
+  l.drawLine(74, 40, 64, 50, WHITE);
+  l.drawLine(54, 40-1, 64, 50-1, WHITE);
+  l.drawLine(74, 40-1, 64, 50-1, WHITE);
+}
+void oc(){ // con los ojos cerrados
+  l.drawLine(61, 18+5, 55, 18+5, WHITE);
+  l.drawLine(73, 18+5, 67, 18+5, WHITE);
+}
+void bmf(){ //mout muy happy :D
+  l.fillCircle(64, 40, 10, WHITE);
+  l.fillRect(54, 30, 40, 10, BLACK);
+}
+void bw(){ // boca :3
+  l.drawLine(54, 40, 64-5, 50, WHITE);
+  l.drawLine(74, 40, 64+5, 50, WHITE);
+
+  l.drawLine(69, 50, 64, 45, WHITE);
+  l.drawLine(59, 50, 64, 45, WHITE);
+
+  l.drawLine(54, 40-1, 64-5, 50-1, WHITE);
+  l.drawLine(74, 40-1, 64+5, 50-1, WHITE);
+
+}
+
+void setup(){
+  l.begin(SSD1306_SWITCHCAPVCC, 0x3c);
+  l.clearDisplay();
+  l.setTextColor(WHITE);
+  l.setTextSize(1);
+  pinMode(3, INPUT_PULLUP);
+  t = millis();
+  l.display();
+  bf();
+  afk = millis();
+}
+void loop(){
+  l.clearDisplay();
+    switch(e){
+      case 0:
+      bf();
+      break;
+      case 1:
+      bmf();
+      break;
+      case 2:
+      bw();
+      break;
+    }
+   if(millis() - te > cd){
+   e = 0;
+  }
+  if(digitalRead(3) == LOW){
+    if(to == 0){
+    e = 1;
+    to = 1;
+    cd = 1500;
+    }
+    else if(to == 1){
+    e = 2;
+    to = 0;
+        cd = 30000;
+
+    }
+    te = millis();
+    afk = millis();
+    l.display();
+    delay(250);
+  }
+
+  if( millis() - t < 2000){
+   oa();
+  }
+  else if(millis() - afk < 10000){
+   oc();
+   l.display();
+   delay(100);
+   t = millis(); 
+  }
+  else{
+   oc();
+   l.setCursor(47, 53);
+
+   l.print("mimido");
+  }
+  
+l.display();
+}

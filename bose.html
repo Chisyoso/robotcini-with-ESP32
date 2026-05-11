@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Timbito PRO</title>
+
+<style>
+body{
+    margin:0;
+    background:#0f0f0f;
+    color:white;
+    font-family:Arial;
+    padding:15px;
+}
+
+.container{max-width:720px;margin:auto;}
+
+.card{
+    background:#1c1c1c;
+    padding:15px;
+    border-radius:14px;
+    margin-bottom:12px;
+}
+
+input,button{
+    width:100%;
+    padding:14px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+}
+
+input{background:#2a2a2a;color:white;}
+button{background:#333;color:white;}
+
+button:active{transform:scale(.98);}
+
+.chat{
+    background:#222;
+    padding:12px;
+    border-radius:10px;
+    margin-top:12px;
+    min-height:120px;
+    white-space:pre-wrap;
+}
+
+.micBox{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+}
+
+.dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#666;
+}
+
+.active{
+    background:#00ff88;
+    box-shadow:0 0 10px #00ff88;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h2>Timbito PRO 🤖</h2>
+
+<input id="key" placeholder="API KEY OpenRouter">
+
+<button onclick="saveKey()">Guardar KEY</button>
+
+<input id="msg" placeholder="Escribe o usa micrófono">
+
+<button onclick="talk()">Enviar</button>
+
+<button onclick="toggleTimbito()">🎤 Timbito ON/OFF</button>
+
+<div class="micBox">
+<div id="dot" class="dot"></div>
+<div id="micText">Timbito apagado</div>
+</div>
+
+<div id="chat" class="chat">Listo...</div>
+
+</div>
+
+</div>
+
+<script>
+
+let recognition;
+let active=false;
+let loading=false;
+
+const KEY="timbito_key";
+
+// =====================
+// INIT SPEECH
+// =====================
+
+function initMic(){
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if(!SR){
+        document.getElementById("micText").innerText="No soportado";
+        return;
+    }
+
+    recognition = new SR();
+    recognition.lang="es-ES";
+    recognition.continuous=false;
+    recognition.interimResults=false;
+
+    recognition.onstart=()=>{
+        setMic(true);
+    };
+
+    recognition.onend=()=>{
+        setMic(false);
+        if(active){
+            setTimeout(()=>recognition.start(),500);
+        }
+    };
+
+    recognition.onerror=(e)=>{
+        setMic(false);
+        console.log(e);
+    };
+
+    recognition.onresult=(e)=>{
+        const text=e.results[0][0].transcript.trim();
+        document.getElementById("msg").value=text;
+        talk(text);
+    };
+}
+
+// =====================
+// MIC TOGGLE (PRO)
+// =====================
+
+async function toggleTimbito(){
+
+    if(!recognition) initMic();
+
+    active=!active;
+
+    if(!active){
+        recognition.stop();
+        setMic(false);
+        return;
+    }
+
+    try{
+
+        const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+        stream.getTracks().forEach(t=>t.stop());
+
+        recognition.start();
+
+    }catch(err){
+
+        active=false;
+
+        document.getElementById("chat").innerText=
+        "❌ Sin permiso de micrófono";
+
+    }
+}
+
+// =====================
+// UI MIC
+// =====================
+
+function setMic(state){
+
+    const dot=document.getElementById("dot");
+    const text=document.getElementById("micText");
+
+    if(state){
+        dot.classList.add("active");
+        text.innerText="🎤 Timbito escuchando...";
+    }else{
+        dot.classList.remove("active");
+        text.innerText="Timbito apagado";
+    }
+}
+
+// =====================
+// KEY
+// =====================
+
+function saveKey(){
+    localStorage.setItem(KEY,document.getElementById("key").value);
+}
+
+function getKey(){
+    return localStorage.getItem(KEY);
+}
+
+// =====================
+// IA
+// =====================
+
+async function talk(customMsg){
+
+    if(loading) return;
+    loading=true;
+
+    const key=getKey();
+    const msg=customMsg || document.getElementById("msg").value;
+
+    document.getElementById("msg").value="";
+    document.getElementById("chat").innerText="Pensando...";
+
+    try{
+
+        const res=await fetch("https://openrouter.ai/api/v1/chat/completions",{
+            method:"POST",
+            headers:{
+                "Authorization":"Bearer "+key,
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                model:"openrouter/auto",
+                messages:[
+                    {
+                        role:"system",
+                        content:`
+Eres Timbito. Responde natural, corto, en español.
+Incluye pensamiento interno al final como: 💭 ...
+No repitas mensajes.
+`
+                    },
+                    {
+                        role:"user",
+                        content:msg
+                    }
+                ]
+            })
+        });
+
+        const data=await res.json();
+        const reply=data?.choices?.[0]?.message?.content || "Error";
+
+        document.getElementById("chat").innerText=
+        "Tú: "+msg+"\n\nTimbito:\n"+reply;
+
+        speak(reply);
+
+    }catch(e){
+        document.getElementById("chat").innerText="Error IA";
+    }
+
+    loading=false;
+}
+
+// =====================
+// VOZ
+// =====================
+
+function speak(text){
+
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="es-ES";
+    u.rate=1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+}
+
+</script>
+
+</body>
+</html>

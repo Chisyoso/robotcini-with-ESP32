@@ -6,7 +6,7 @@
 
 <meta
 name="viewport"
-content="width=device-width, initial-scale=1, viewport-fit=cover"
+content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 >
 
 <title>Timbito PRO</title>
@@ -14,208 +14,140 @@ content="width=device-width, initial-scale=1, viewport-fit=cover"
 <style>
 
 *{
-    box-sizing:border-box;
+box-sizing:border-box;
 }
 
 body{
-
-    margin:0;
-    background:#0f0f0f;
-    color:white;
-    font-family:Arial;
-    padding:15px;
-
+margin:0;
+background:#0f0f0f;
+font-family:Arial;
+color:white;
+padding:15px;
 }
 
 .container{
-
-    width:100%;
-    max-width:720px;
-    margin:auto;
-
+max-width:720px;
+margin:auto;
 }
 
 .card{
-
-    background:#1c1c1c;
-    padding:15px;
-    border-radius:16px;
-    margin-bottom:15px;
-
-}
-
-h2,h3{
-    margin-top:0;
+background:#1b1b1b;
+padding:15px;
+border-radius:16px;
+margin-bottom:15px;
 }
 
 input,button{
-
-    width:100%;
-    padding:14px;
-    margin-top:10px;
-
-    border:none;
-    border-radius:12px;
-
-    font-size:16px;
-
+width:100%;
+padding:14px;
+margin-top:10px;
+border:none;
+border-radius:12px;
+font-size:16px;
 }
 
 input{
-
-    background:#2a2a2a;
-    color:white;
-
+background:#2a2a2a;
+color:white;
 }
 
 button{
-
-    background:#343434;
-    color:white;
-
-}
-
-button:active{
-    transform:scale(.98);
+background:#343434;
+color:white;
 }
 
 .chat{
-
-    background:#222;
-    border-radius:12px;
-    padding:15px;
-    margin-top:15px;
-    min-height:180px;
-    line-height:1.5;
-    white-space:pre-wrap;
-    word-wrap:break-word;
-
+background:#222;
+padding:15px;
+border-radius:12px;
+margin-top:15px;
+min-height:160px;
+white-space:pre-wrap;
+line-height:1.5;
 }
 
-#emotionBox{
-
-    background:#222;
-    border-radius:12px;
-    padding:18px;
-    text-align:center;
-    font-size:24px;
-    margin-top:10px;
-
-}
-
-.micBox{
-
-    margin-top:15px;
-
-    background:#191919;
-
-    border-radius:12px;
-
-    padding:15px;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:14px;
-
+.micStatus{
+display:flex;
+align-items:center;
+gap:12px;
+margin-top:15px;
 }
 
 .dot{
-
-    width:18px;
-    height:18px;
-
-    border-radius:50%;
-
-    background:#666;
-
+width:16px;
+height:16px;
+border-radius:50%;
+background:#666;
 }
 
-.dotActive{
-
-    background:#00ff88;
-
-    animation:pulse 1s infinite;
-
-}
-
-.wave{
-
-    display:flex;
-    align-items:flex-end;
-    gap:4px;
-    height:24px;
-
-}
-
-.bar{
-
-    width:5px;
-    height:8px;
-
-    background:#00ff88;
-
-    border-radius:20px;
-
-    animation:wave 1s infinite;
-
-}
-
-.bar:nth-child(2){
-    animation-delay:.1s;
-}
-
-.bar:nth-child(3){
-    animation-delay:.2s;
-}
-
-.bar:nth-child(4){
-    animation-delay:.3s;
-}
-
-.hidden{
-    display:none;
-}
-
-.small{
-
-    margin-top:8px;
-    opacity:.7;
-    font-size:13px;
-
+.active{
+background:#00ff88;
+box-shadow:0 0 20px #00ff88;
+animation:pulse 1s infinite;
 }
 
 @keyframes pulse{
 
-    0%{
-        box-shadow:0 0 0 0 rgba(0,255,136,.7);
-    }
+0%{
+transform:scale(1);
+}
 
-    70%{
-        box-shadow:0 0 0 14px rgba(0,255,136,0);
-    }
+50%{
+transform:scale(1.3);
+}
 
-    100%{
-        box-shadow:0 0 0 0 rgba(0,255,136,0);
-    }
+100%{
+transform:scale(1);
+}
 
+}
+
+.wave{
+display:flex;
+align-items:flex-end;
+gap:4px;
+height:30px;
+}
+
+.bar{
+width:5px;
+background:#00ff88;
+border-radius:10px;
+animation:wave 1s infinite;
+}
+
+.bar:nth-child(2){
+animation-delay:.1s;
+}
+
+.bar:nth-child(3){
+animation-delay:.2s;
+}
+
+.bar:nth-child(4){
+animation-delay:.3s;
 }
 
 @keyframes wave{
 
-    0%{
-        height:5px;
-    }
+0%{
+height:5px;
+}
 
-    50%{
-        height:24px;
-    }
+50%{
+height:28px;
+}
 
-    100%{
-        height:5px;
-    }
+100%{
+height:5px;
+}
 
+}
+
+#emotion{
+font-size:22px;
+text-align:center;
+padding:10px;
 }
 
 </style>
@@ -228,7 +160,7 @@ button:active{
 
 <div class="card">
 
-<h2>Timbito PRO 🤖</h2>
+<h2>Timbito 🤖</h2>
 
 <input
 id="key"
@@ -241,34 +173,27 @@ Guardar KEY
 
 <input
 id="espip"
-placeholder="IP ESP32 (ejemplo: 192.168.1.34)"
+placeholder="IP ESP8266"
 >
 
 <button onclick="saveIP()">
-Guardar IP ESP32
+Guardar IP ESP
 </button>
 
 <input
 id="msg"
-placeholder="Escribe o habla con Timbito"
+placeholder="Habla con Timbito"
 >
 
 <button onclick="talk()">
 Enviar
 </button>
 
-<button onclick="toggleTimbito()">
+<button onclick="toggleMic()">
 🎤 Timbito ON/OFF
 </button>
 
-<div class="small">
-Puedes decir:
-<b>"te invito"</b>
-y Timbito entenderá que dijiste:
-<b>"Timbito"</b>
-</div>
-
-<div class="micBox">
+<div class="micStatus">
 
 <div
 id="dot"
@@ -278,13 +203,10 @@ class="dot">
 <div>
 
 <div id="micText">
-Timbito apagado
+Micrófono apagado
 </div>
 
-<div
-id="wave"
-class="wave hidden"
->
+<div class="wave">
 
 <div class="bar"></div>
 <div class="bar"></div>
@@ -297,22 +219,17 @@ class="wave hidden"
 
 </div>
 
-<div
-id="chat"
-class="chat"
->
-
+<div id="chat" class="chat">
 Listo...
-
 </div>
 
 </div>
 
 <div class="card">
 
-<h3>Estado emocional</h3>
+<h3>Estado</h3>
 
-<div id="emotionBox">
+<div id="emotion">
 Neutro 😐
 </div>
 
@@ -322,17 +239,14 @@ Neutro 😐
 
 <script>
 
-let recognition=null;
+let recognition;
 
 let active=false;
 
 let loading=false;
 
-let micInitialized=false;
-
-const KEY_STORAGE="timbito_key";
-const IP_STORAGE="timbito_ip";
-const MEM_STORAGE="timbito_mem";
+const KEY="timbito_key";
+const ESP="timbito_esp";
 
 // ======================
 // INIT
@@ -340,14 +254,10 @@ const MEM_STORAGE="timbito_mem";
 
 window.onload=()=>{
 
-    loadKey();
-    loadIP();
+loadKey();
+loadIP();
 
-    const mem=getMem();
-
-    setEmotionUI(
-        mem.emotion || "neutral"
-    );
+initMic();
 
 };
 
@@ -357,315 +267,258 @@ window.onload=()=>{
 
 function saveKey(){
 
-    localStorage.setItem(
-        KEY_STORAGE,
-        document.getElementById("key").value.trim()
-    );
+localStorage.setItem(
+KEY,
+document.getElementById("key").value
+);
 
 }
 
 function loadKey(){
 
-    const key=
-    localStorage.getItem(KEY_STORAGE);
+const k=
+localStorage.getItem(KEY);
 
-    if(key){
+if(k){
 
-        document.getElementById("key").value=key;
+document.getElementById("key").value=k;
 
-    }
+}
 
 }
 
 function saveIP(){
 
-    localStorage.setItem(
-        IP_STORAGE,
-        document.getElementById("espip").value.trim()
-    );
+localStorage.setItem(
+ESP,
+document.getElementById("espip").value
+);
 
 }
 
 function loadIP(){
 
-    const ip=
-    localStorage.getItem(IP_STORAGE);
+const ip=
+localStorage.getItem(ESP);
 
-    if(ip){
+if(ip){
 
-        document.getElementById("espip").value=ip;
-
-    }
+document.getElementById("espip").value=ip;
 
 }
 
-function getMem(){
-
-    return JSON.parse(
-        localStorage.getItem(MEM_STORAGE)
-    ) || {
-
-        emotion:"neutral",
-        lastUser:null
-
-    };
-
 }
 
-function saveMem(mem){
+function esp(){
 
-    localStorage.setItem(
-        MEM_STORAGE,
-        JSON.stringify(mem)
-    );
+return document.getElementById("espip").value.trim();
 
 }
 
 // ======================
-// EMOTION UI
+// ESP SEND
 // ======================
 
-function setEmotionUI(emotion){
+async function sendESP(route){
 
-    const box=
-    document.getElementById("emotionBox");
+const ip=esp();
 
-    const emotions={
+if(!ip)return;
 
-        happy:"Feliz 😊",
+try{
 
-        sad:"Triste 😢",
+await fetch(
+"http://"+ip+"/"+route
+);
 
-        angry:"Enojado 😠",
+}catch(e){
 
-        neutral:"Neutro 😐"
+console.log(e);
 
-    };
-
-    box.innerHTML=
-    emotions[emotion] || "Neutro 😐";
+}
 
 }
 
 // ======================
-// MIC UI
+// MIC
 // ======================
 
-function setMicUI(state){
+function initMic(){
 
-    const dot=
-    document.getElementById("dot");
+const SR=
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
 
-    const text=
-    document.getElementById("micText");
+if(!SR){
 
-    const wave=
-    document.getElementById("wave");
+document.getElementById("micText")
+.innerText="No soportado";
 
-    if(state){
+return;
 
-        dot.classList.add("dotActive");
+}
 
-        wave.classList.remove("hidden");
+recognition=new SR();
 
-        text.innerHTML=
-        "🎤 Timbito escuchando...";
+recognition.lang="es-ES";
 
-    }else{
+recognition.continuous=true;
 
-        dot.classList.remove("dotActive");
+recognition.interimResults=false;
 
-        wave.classList.add("hidden");
+recognition.onstart=()=>{
 
-        text.innerHTML=
-        "Timbito apagado";
+setMic(true);
 
-    }
+};
+
+recognition.onend=()=>{
+
+setMic(false);
+
+if(active){
+
+setTimeout(()=>{
+
+recognition.start();
+
+},500);
+
+}
+
+};
+
+recognition.onresult=(e)=>{
+
+const text=
+e.results[e.results.length-1][0]
+.transcript
+.toLowerCase()
+.trim();
+
+console.log(text);
+
+if(
+text.includes("te invito")
+){
+
+text=text.replace(
+/te invito/gi,
+"timbito"
+);
+
+}
+
+if(
+text.includes("timbito")
+){
+
+const cleaned=
+text
+.replace(/timbito/gi,"")
+.trim();
+
+if(cleaned){
+
+document.getElementById("msg")
+.value=cleaned;
+
+talk(cleaned);
+
+}
+
+}
+
+};
 
 }
 
 // ======================
-// INIT MIC
+// TOGGLE
 // ======================
 
-async function initMic(){
+async function toggleMic(){
 
-    if(micInitialized) return true;
+active=!active;
 
-    const SR=
+if(!active){
 
-    window.SpeechRecognition ||
+recognition.stop();
 
-    window.webkitSpeechRecognition;
+return;
 
-    if(!SR){
+}
 
-        document.getElementById("chat").innerHTML=
-        "❌ Navegador no compatible";
+try{
 
-        return false;
+await navigator.mediaDevices
+.getUserMedia({
+audio:true
+});
 
-    }
+recognition.start();
 
-    try{
+}catch(e){
 
-        await navigator.mediaDevices
-        .getUserMedia({
-            audio:true
-        });
+active=false;
 
-    }catch(err){
+document.getElementById("chat")
+.innerHTML=
+"❌ No pude acceder al micrófono";
 
-        document.getElementById("chat").innerHTML=
-        "❌ Permiso de micrófono denegado";
-
-        return false;
-
-    }
-
-    recognition=new SR();
-
-    recognition.lang="es-ES";
-
-    recognition.continuous=true;
-
-    recognition.interimResults=false;
-
-    recognition.maxAlternatives=1;
-
-    recognition.onstart=()=>{
-
-        setMicUI(true);
-
-    };
-
-    recognition.onend=()=>{
-
-        setMicUI(false);
-
-        if(active){
-
-            setTimeout(()=>{
-
-                try{
-                    recognition.start();
-                }catch(e){}
-
-            },500);
-
-        }
-
-    };
-
-    recognition.onerror=(event)=>{
-
-        console.log(event);
-
-        setMicUI(false);
-
-    };
-
-    recognition.onresult=(event)=>{
-
-        const text=
-        event.results[
-            event.results.length-1
-        ][0].transcript.trim();
-
-        console.log(text);
-
-        processVoice(text);
-
-    };
-
-    micInitialized=true;
-
-    return true;
+}
 
 }
 
 // ======================
-// TOGGLE MIC
+// UI
 // ======================
 
-async function toggleTimbito(){
+function setMic(v){
 
-    const ok=
-    await initMic();
+const d=
+document.getElementById("dot");
 
-    if(!ok) return;
+const t=
+document.getElementById("micText");
 
-    active=!active;
+if(v){
 
-    if(active){
+d.classList.add("active");
 
-        try{
+t.innerText=
+"🎤 Timbito escuchando";
 
-            recognition.start();
+}else{
 
-        }catch(e){}
+d.classList.remove("active");
 
-    }else{
-
-        recognition.stop();
-
-        setMicUI(false);
-
-    }
+t.innerText=
+"Timbito dormido";
 
 }
 
-// ======================
-// VOICE PROCESS
-// ======================
+}
 
-function processVoice(text){
+function setEmotion(e){
 
-    const lower=text.toLowerCase();
+const box=
+document.getElementById("emotion");
 
-    // FIX IMPORTANTE:
-    // "te invito" => "timbito"
+const map={
 
-    if(
-        lower.includes("te invito")
-    ){
+happy:"Feliz 😊",
 
-        const clean=
-        lower
-        .replaceAll("te invito","")
-        .trim();
+sad:"Triste 😢",
 
-        if(clean){
+angry:"Enojado 😠",
 
-            document.getElementById("msg")
-            .value=clean;
+neutral:"Neutro 😐"
 
-            talk(clean);
+};
 
-        }
-
-        return;
-    }
-
-    if(
-        lower.includes("timbito")
-    ){
-
-        const clean=
-        lower
-        .replaceAll("timbito","")
-        .trim();
-
-        if(clean){
-
-            document.getElementById("msg")
-            .value=clean;
-
-            talk(clean);
-
-        }
-
-    }
+box.innerHTML=
+map[e] || "Neutro 😐";
 
 }
 
@@ -675,69 +528,110 @@ function processVoice(text){
 
 function speak(reply,note){
 
-    speechSynthesis.cancel();
+speechSynthesis.cancel();
 
-    const main=
-    new SpeechSynthesisUtterance(
-        reply
-    );
+sendESP("talk");
 
-    main.lang="es-ES";
+const a=
+new SpeechSynthesisUtterance(
+reply
+);
 
-    main.rate=1;
+a.lang="es-ES";
 
-    main.pitch=1;
+a.rate=1;
 
-    speechSynthesis.speak(main);
+a.pitch=1;
 
-    if(note){
+a.onend=()=>{
 
-        main.onend=()=>{
+if(note){
 
-            const thought=
-            new SpeechSynthesisUtterance(
-                "Pensamiento. "+note
-            );
+const b=
+new SpeechSynthesisUtterance(
+"Pensamiento. "+note
+);
 
-            thought.lang="es-ES";
+b.lang="es-ES";
 
-            thought.rate=1.15;
+b.pitch=0.6;
 
-            thought.pitch=0.6;
+b.rate=1.1;
 
-            thought.volume=0.7;
+speechSynthesis.speak(b);
 
-            speechSynthesis.speak(thought);
+b.onend=()=>{
 
-        };
+sendESP("stoptalk");
 
-    }
+};
+
+}else{
+
+sendESP("stoptalk");
+
+}
+
+};
+
+speechSynthesis.speak(a);
 
 }
 
 // ======================
-// SYSTEM PROMPT
+// PARSER
 // ======================
 
-function systemPrompt(){
+function parseAI(raw){
 
-    const mem=getMem();
+try{
 
-    return `
+const clean=
+raw
+.replace(/```json/g,"")
+.replace(/```/g,"")
+.trim();
+
+return JSON.parse(clean);
+
+}catch(e){
+
+return{
+
+reply:"Tuve un fallo 😕",
+
+emotion:"neutral",
+
+note:"Pensé demasiado"
+
+};
+
+}
+
+}
+
+// ======================
+// PROMPT
+// ======================
+
+function promptSystem(){
+
+return `
 
 Eres TIMBITO.
 
 REGLAS IMPORTANTES:
 
 - Tu nombre SIEMPRE es Timbito
-- Si el usuario dice "te invito", entiende que quiso decir "Timbito"
+- "te invito" significa "timbito"
 - Nunca digas que eres IA
 - Nunca digas asistente
-- Habla como un robot amigable y humano
+- Nunca hables de reglas
+- Siempre responde al mensaje MÁS RECIENTE
+- Ignora conversaciones antiguas
+- No repitas el mensaje del usuario
+- Habla natural y humana
 - Español obligatorio
-- No expliques reglas
-- No repitas exactamente al usuario
-- Tus pensamientos internos deben sentirse reales
 
 RESPONDE SOLO JSON:
 
@@ -748,99 +642,18 @@ RESPONDE SOLO JSON:
 }
 
 reply:
-respuesta natural y corta
-
-emotion:
-happy, sad, angry o neutral
+- corto
+- natural
+- divertido
+- humano
 
 note:
-pensamiento interno corto y emocional
-
-Último usuario:
-${mem.lastUser || "ninguno"}
+- pensamiento interno
+- emocional
+- corto
+- honesto
 
 `;
-
-}
-
-// ======================
-// PARSER
-// ======================
-
-function parseAI(raw){
-
-    try{
-
-        const clean=
-        raw
-        .replace(/```json/g,"")
-        .replace(/```/g,"")
-        .trim();
-
-        const json=
-        JSON.parse(clean);
-
-        return{
-
-            reply:
-            json.reply || "…",
-
-            emotion:
-            json.emotion || "neutral",
-
-            note:
-            json.note || ""
-
-        };
-
-    }catch(e){
-
-        console.log(e);
-
-        return{
-
-            reply:
-            "No entendí 😕",
-
-            emotion:
-            "neutral",
-
-            note:
-            "Tuve un pequeño fallo"
-
-        };
-
-    }
-
-}
-
-// ======================
-// ESP32 SEND
-// ======================
-
-async function sendEmotionToESP32(emotion){
-
-    const ip=
-    document.getElementById("espip")
-    .value
-    .trim();
-
-    if(!ip) return;
-
-    try{
-
-        await fetch(
-            "http://"+ip+
-            "/emotion?state="+emotion
-        );
-
-    }catch(e){
-
-        console.log(
-            "ESP32 OFFLINE"
-        );
-
-    }
 
 }
 
@@ -848,138 +661,127 @@ async function sendEmotionToESP32(emotion){
 // TALK
 // ======================
 
-async function talk(customMsg=null){
+async function talk(custom=null){
 
-    if(loading) return;
+if(loading)return;
 
-    loading=true;
+loading=true;
 
-    const key=
-    document.getElementById("key")
-    .value
-    .trim();
+const key=
+document.getElementById("key")
+.value
+.trim();
 
-    const msg=
-    customMsg ||
+const msg=
+custom ||
+document.getElementById("msg")
+.value
+.trim();
 
-    document.getElementById("msg")
-    .value
-    .trim();
+if(!msg){
 
-    const chat=
-    document.getElementById("chat");
+loading=false;
+return;
 
-    if(!key || !msg){
+}
 
-        loading=false;
-        return;
+document.getElementById("msg")
+.value="";
 
-    }
+document.getElementById("chat")
+.innerHTML=
+"🤔 Timbito pensando...";
 
-    document.getElementById("msg")
-    .value="";
+sendESP("thinking");
 
-    chat.innerHTML=
-    "🤔 Pensando...";
+try{
 
-    try{
+const res=
+await fetch(
+"https://openrouter.ai/api/v1/chat/completions",
+{
+method:"POST",
 
-        const response=
-        await fetch(
+headers:{
 
-        "https://openrouter.ai/api/v1/chat/completions",
+"Authorization":
+"Bearer "+key,
 
-        {
+"Content-Type":
+"application/json"
 
-            method:"POST",
+},
 
-            headers:{
+body:JSON.stringify({
 
-                "Authorization":
-                "Bearer "+key,
+model:"openrouter/auto",
 
-                "Content-Type":
-                "application/json"
+messages:[
 
-            },
+{
+role:"system",
+content:promptSystem()
+},
 
-            body:JSON.stringify({
+{
+role:"user",
+content:msg
+}
 
-                model:"openrouter/auto",
+]
 
-                messages:[
+})
 
-                    {
-                        role:"system",
-                        content:systemPrompt()
-                    },
+}
+);
 
-                    {
-                        role:"user",
-                        content:msg
-                    }
+const data=
+await res.json();
 
-                ]
+sendESP("stopthinking");
 
-            })
+const raw=
+data?.choices?.[0]
+?.message?.content || "";
 
-        });
+const ai=
+parseAI(raw);
 
-        const data=
-        await response.json();
+document.getElementById("chat")
+.innerHTML=
 
-        const raw=
-        data?.choices?.[0]
-        ?.message?.content || "";
+"<b>Tú:</b><br>"+msg+
 
-        console.log(raw);
+"<br><br><b>Timbito:</b><br>"+
 
-        const parsed=
-        parseAI(raw);
+ai.reply+
 
-        chat.innerHTML=
+"<br><br><i>💭 "+
+ai.note+
+"</i>";
 
-        "<b>Tú:</b><br>"+msg+
+setEmotion(ai.emotion);
 
-        "<br><br><b>Timbito:</b><br>"+
+sendESP(
+"emotion?e="+ai.emotion
+);
 
-        parsed.reply+
+speak(
+ai.reply,
+ai.note
+);
 
-        "<br><br><i>💭 "+
-        parsed.note+
-        "</i>";
+}catch(e){
 
-        const mem=getMem();
+sendESP("stopthinking");
 
-        mem.lastUser=msg;
+document.getElementById("chat")
+.innerHTML=
+"❌ Error IA";
 
-        mem.emotion=parsed.emotion;
+}
 
-        saveMem(mem);
-
-        setEmotionUI(
-            parsed.emotion
-        );
-
-        await sendEmotionToESP32(
-            parsed.emotion
-        );
-
-        speak(
-            parsed.reply,
-            parsed.note
-        );
-
-    }catch(err){
-
-        console.log(err);
-
-        chat.innerHTML=
-        "❌ Error conexión IA";
-
-    }
-
-    loading=false;
+loading=false;
 
 }
 
